@@ -12,16 +12,23 @@ const publicDirectoryPath = path.join(__dirname, '../public');
 
 app.use(express.static(publicDirectoryPath));
 
-let count = 0;
-
 io.on('connection', (socket) => {
     console.log('New websocket connection');
 
-    socket.emit('countUpdated', count);
+    socket.emit('message', 'Welcome!');
+    socket.broadcast.emit('message', 'A new user has joined!');
 
-    socket.on('increment', () => {
-        count += 1;
-        io.emit('countUpdated', count);
+    socket.on('sendMessage', (value) => {
+        io.emit('message', value);
+    });
+
+    socket.on('disconnect', () => {
+        io.emit('message', 'A user has left');
+    });
+
+    socket.on('sendLocation', (pos) => {
+        console.log(pos);
+        io.emit('message', `https://google.com/maps?q=${pos.latitude},${pos.longitude}` )
     });
 });
 
